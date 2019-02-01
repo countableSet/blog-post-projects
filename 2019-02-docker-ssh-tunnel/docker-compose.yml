@@ -1,0 +1,50 @@
+version: "3.7"
+services:
+  ingress:
+    tty: true
+    build:
+      context: ./nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${HOME}/.ssh/id_rsa:/root/.ssh/id_copy:ro
+    environment:
+      SSH_TUNNEL: "-R 0.0.0.0:${REVERSE_PORT}:127.0.0.1:5000 -f -N"
+      SSH_CONNECTION_HOST: ${REMOTE_HOST}
+    command: /bin/sh -c "./ssh.sh; exec nginx -g 'daemon off;'"
+    ports:
+      - tartget: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
+    networks:
+      - ingress
+    dependes_on:
+      - server
+
+  server:
+    build:
+      context: .
+    networks:
+      - ingress
+      - remote
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    tty: true
+    restart: unless-stopped
+    build:
+      context: ./tunnel
+    volumes:
+      - ${HOME}/.ssh/id_rsa:/root/.ssh/id_copy:ro
+    environment:
+      SSH_TUNNEL: "-L 0.0.0.0:${ZK_PORT}:127.0.0.1:${ZK_PORT}"
+      SSH_CONNECTION_HOST: ${REMOTE_HOST}
+    networks:
+      - remote
+
+networks:
+  ingress:
+    driver: bridge
+  remote:
+    driver: bridge

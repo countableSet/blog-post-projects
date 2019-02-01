@@ -1,0 +1,7 @@
+Host *.example.com
+    IdentityFile /root/.ssh/id_local
+    StrictHostKeyChecking no
+    ServerAliveInterval 120
+    ServerAliveCountMax 720
+    ForwardAgent no
+    ForwardX11 no
