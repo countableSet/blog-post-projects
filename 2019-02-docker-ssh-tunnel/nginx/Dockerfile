@@ -7,7 +7,7 @@ ENV SSH_TUNNEL="-L 0.0.0.0:80:127.0.0.1:8080"
 
 RUN apk add --no-cache openssh-client su-exec bash \
     && mkdir -p /root/.ssh \
-    && chwon 700 /root/.ssh
+    && chown 700 /root/.ssh
 
 COPY ../tunnel/ssh-config /root/.ssh/config
 COPY ../tunnel/ssh.sh /root/ssh.sh
